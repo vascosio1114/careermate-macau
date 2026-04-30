@@ -1,36 +1,74 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🏙️ CareerMate Macau
 
-## Getting Started
+> A personal side project — wanted to see if I could build a full app from scratch.
 
-First, run the development server:
+CareerMate Macau is a career networking platform for Macau students, fresh graduates, mentors, and startups. The idea: connect people for coffee chats, share resumes, and build professional networks in a city where that kind of platform doesn't really exist yet.
+
+This is a learning project. I'm building it phase by phase to figure out how full-stack development actually works in practice.
+
+**🚧 Currently: Phase 3 of 9 — Auth flow complete**
+
+---
+
+## 💡 The Idea
+
+Macau has a lot of talented students and a growing startup scene, but there's no dedicated platform to connect them. CareerMate Macau is an attempt to build something for that gap — in Cantonese, for the local context.
+
+---
+
+## ✅ What's Built So Far
+
+**Phase 1** — Project setup: Next.js bootstrapped, folder structure, tooling
+
+**Phase 2** — Supabase integration: database schema, storage setup, client connection
+
+**Phase 3** *(current)* — Auth flow: signup, login, logout using Supabase Auth + server-side session handling via middleware
+
+---
+
+## 🗺️ Build Plan
+
+| Phase | Focus |
+|-------|-------|
+| 1 | Project setup |
+| 2 | Supabase DB schema + storage |
+| 3 | Auth flow (signup / login / logout) ✅ |
+| 4 | User profile page |
+| 5 | Resume upload & display |
+| 6 | Browse & search profiles |
+| 7 | Coffee chat request system |
+| 8 | Mentor / startup listing |
+| 9 | Polish, deploy, test |
+
+---
+
+## 🛠️ Tech Stack
+
+- **Framework:** Next.js (App Router) · TypeScript
+- **Backend & Auth:** Supabase (PostgreSQL + Auth + Storage)
+- **Styling:** Tailwind CSS
+- **Deployment:** Vercel *(planned)*
+
+---
+
+## 🚀 Run Locally
 
 ```bash
+git clone https://github.com/vascosio1114/careermate-macau.git
+cd careermate-macau
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Add a `.env.local` with your Supabase credentials:
+```
+NEXT_PUBLIC_SUPABASE_URL=your_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_key
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 👤 Author
 
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+**Vasco Sio (Kei Chon)** · Year 4 · GIS & Statistics · University of Toronto Mississauga
+📫 keichonsio1114@gmail.com
