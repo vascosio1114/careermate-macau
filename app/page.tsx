@@ -1,8 +1,12 @@
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
+import { logout } from "./(auth)/actions";
 
 export default async function Home() {
   const supabase = await createClient();
-  const { data, error } = await supabase.from("profiles").select("count");
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-amber-50 to-white p-8">
@@ -17,29 +21,39 @@ export default async function Home() {
           展示你嘅 resume，搵人 coffee chat，建立職業人脈。
         </p>
 
-        <div className="mt-10 flex flex-col gap-3 sm:flex-row sm:justify-center">
-          <button className="rounded-full bg-amber-600 px-8 py-3 font-semibold text-white shadow-md transition hover:bg-amber-700">
-            開始探索
-          </button>
-          <button className="rounded-full border border-stone-300 bg-white px-8 py-3 font-semibold text-stone-700 transition hover:bg-stone-50">
-            登入
-          </button>
-        </div>
-
-        {/* Supabase connection test */}
-        <div className="mt-8 rounded-lg border border-stone-200 bg-white p-4 text-sm">
-          <strong>Supabase status:</strong>{" "}
-          {error ? (
-            <span className="text-red-600">❌ {error.message}</span>
-          ) : (
-            <span className="text-green-600">
-              ✅ Connected (data: {JSON.stringify(data)})
-            </span>
-          )}
-        </div>
+        {user ? (
+          <div className="mt-10 space-y-4">
+            <p className="text-stone-700">
+              👋 你好，<strong>{user.email}</strong>
+            </p>
+            <form action={logout}>
+              <button
+                type="submit"
+                className="rounded-full border border-stone-300 bg-white px-8 py-3 font-semibold text-stone-700 transition hover:bg-stone-50"
+              >
+                登出
+              </button>
+            </form>
+          </div>
+        ) : (
+          <div className="mt-10 flex flex-col gap-3 sm:flex-row sm:justify-center">
+            <Link
+              href="/signup"
+              className="rounded-full bg-amber-600 px-8 py-3 font-semibold text-white shadow-md transition hover:bg-amber-700"
+            >
+              開始探索
+            </Link>
+            <Link
+              href="/login"
+              className="rounded-full border border-stone-300 bg-white px-8 py-3 font-semibold text-stone-700 transition hover:bg-stone-50"
+            >
+              登入
+            </Link>
+          </div>
+        )}
 
         <p className="mt-12 text-sm text-stone-400">
-          🚧 Building MVP — Phase 2 of 9
+          🚧 Building MVP — Phase 3 of 9
         </p>
       </div>
     </main>
