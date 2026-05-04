@@ -1,7 +1,12 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { updateProfile, uploadProfilePhoto } from "../actions";
+import {
+  updateProfile,
+  uploadProfilePhoto,
+  addSkill,
+  removeSkill,
+} from "../actions";
 
 export default async function EditProfilePage({
   searchParams,
@@ -22,6 +27,12 @@ export default async function EditProfilePage({
     .select("*")
     .eq("id", user.id)
     .single();
+
+  const { data: skills } = await supabase
+    .from("skills")
+    .select("id, skill_name")
+    .eq("user_id", user.id)
+    .order("created_at", { ascending: true });
 
   return (
     <main className="mx-auto max-w-3xl p-6 sm:p-10">
@@ -45,7 +56,7 @@ export default async function EditProfilePage({
         </div>
       )}
 
-      {/* Profile Photo — 獨立 form，唔可以 nest 入主 form */}
+      {/* 📸 Profile Photo */}
       <section className="mt-8 rounded-xl border border-stone-200 bg-white p-6">
         <h2 className="text-lg font-semibold text-stone-800">頭像</h2>
         <div className="mt-4 flex flex-col items-start gap-6 sm:flex-row sm:items-center">
@@ -79,6 +90,52 @@ export default async function EditProfilePage({
             </button>
           </form>
         </div>
+      </section>
+
+      {/* 🏷️ Skills */}
+      <section className="mt-6 rounded-xl border border-stone-200 bg-white p-6">
+        <h2 className="text-lg font-semibold text-stone-800">技能</h2>
+        <p className="mt-1 text-sm text-stone-500">
+          Tag 你嘅 skills，俾人哋透過 skill 搵到你
+        </p>
+
+        <div className="mt-4 flex flex-wrap gap-2">
+          {skills && skills.length > 0 ? (
+            skills.map((s) => (
+              <form key={s.id} action={removeSkill}>
+                <input type="hidden" name="skill_id" value={s.id} />
+                <button
+                  type="submit"
+                  className="group inline-flex items-center gap-2 rounded-full bg-amber-100 px-3 py-1 text-sm font-medium text-amber-800 transition hover:bg-red-100 hover:text-red-700"
+                  title="撳一下刪除"
+                >
+                  <span>{s.skill_name}</span>
+                  <span className="text-amber-600 group-hover:text-red-600">
+                    ×
+                  </span>
+                </button>
+              </form>
+            ))
+          ) : (
+            <p className="text-sm text-stone-400">未加任何 skill</p>
+          )}
+        </div>
+
+        <form action={addSkill} className="mt-4 flex gap-2">
+          <input
+            name="skill_name"
+            required
+            maxLength={50}
+            placeholder="例：JavaScript、Marketing、Excel"
+            className="flex-1 rounded-lg border border-stone-300 px-3 py-2 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
+          />
+          <button
+            type="submit"
+            className="rounded-full bg-amber-600 px-6 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-amber-700"
+          >
+            加入
+          </button>
+        </form>
       </section>
 
       {/* 主 form — 文字 fields */}
@@ -156,29 +213,32 @@ export default async function EditProfilePage({
           />
         </section>
 
-        {/* Links */}
+        {/* Links — type 由 url 改做 text，server 自動補 https:// */}
         <section className="rounded-xl border border-stone-200 bg-white p-6">
           <h2 className="text-lg font-semibold text-stone-800">外部連結</h2>
+          <p className="mt-1 text-sm text-stone-500">
+            打 URL 唔使 https://，系統會自動補
+          </p>
           <div className="mt-4 space-y-4">
             <Field
               label="LinkedIn URL"
               name="linkedin_url"
-              type="url"
-              placeholder="https://linkedin.com/in/..."
+              type="text"
+              placeholder="linkedin.com/in/..."
               defaultValue={profile?.linkedin_url}
             />
             <Field
               label="GitHub URL"
               name="github_url"
-              type="url"
-              placeholder="https://github.com/..."
+              type="text"
+              placeholder="github.com/..."
               defaultValue={profile?.github_url}
             />
             <Field
               label="Portfolio URL"
               name="portfolio_url"
-              type="url"
-              placeholder="https://yoursite.com"
+              type="text"
+              placeholder="yoursite.com"
               defaultValue={profile?.portfolio_url}
             />
           </div>
@@ -224,7 +284,6 @@ export default async function EditProfilePage({
   );
 }
 
-// 重複嘅 input field component
 function Field({
   label,
   name,

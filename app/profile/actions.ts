@@ -4,6 +4,14 @@ import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
+// 自動補 https:// 如果 user 漏咗 protocol
+function normalizeUrl(raw: string | null): string | null {
+  if (!raw || !raw.trim()) return null;
+  const trimmed = raw.trim();
+  if (/^https?:\/\//i.test(trimmed)) return trimmed;
+  return `https://${trimmed}`;
+}
+
 export async function updateProfile(formData: FormData) {
   const supabase = await createClient();
   const {
@@ -21,9 +29,9 @@ export async function updateProfile(formData: FormData) {
     job_title: (formData.get("job_title") as string) || null,
     bio: (formData.get("bio") as string) || null,
     location: (formData.get("location") as string) || null,
-    linkedin_url: (formData.get("linkedin_url") as string) || null,
-    github_url: (formData.get("github_url") as string) || null,
-    portfolio_url: (formData.get("portfolio_url") as string) || null,
+    linkedin_url: normalizeUrl(formData.get("linkedin_url") as string),
+    github_url: normalizeUrl(formData.get("github_url") as string),
+    portfolio_url: normalizeUrl(formData.get("portfolio_url") as string),
     open_to_coffee_chat: formData.get("open_to_coffee_chat") === "on",
   };
 
@@ -90,5 +98,67 @@ export async function uploadProfilePhoto(formData: FormData) {
   }
 
   revalidatePath("/", "layout");
+  redirect("/profile/edit?success=1");
+}
+
+export async function addSkill(formData: FormData) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return redirect("/login");
+
+  const skillName = (formData.get("skill_name") as string)?.trim();
+  if (!skillName) {
+    return redirect("/profile/edit?error=請輸入 skill 名");
+  }
+  if (skillName.length > 50) {
+    return redirect("/profile/edit?error=Skill 名最多 50 字");
+  }
+
+  const { data: existing } = await supabase
+    .from("skills")
+    .select("id")
+    .eq("user_id", user.id)
+    .ilike("skill_name", skillName)
+    .maybeSingle();
+
+  if (existing) {
+    return redirect("/profile/edit?error=已經加咗呢個 skill");
+  }
+
+  const { error } = await supabase
+    .from("skills")
+    .insert({ user_id: user.id, skill_name: skillName });
+
+  if (error) {
+    return redirect(`/profile/edit?error=${encodeURIComponent(error.message)}`);
+  }
+
+  revalidatePath("/profile/edit");
+  redirect("/profile/edit?success=1");
+}
+
+export async function removeSkill(formData: FormData) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return redirect("/login");
+
+  const skillId = formData.get("skill_id") as string;
+  if (!skillId) return redirect("/profile/edit?error=Invalid skill");
+
+  const { error } = await supabase
+    .from("skills")
+    .delete()
+    .eq("id", skillId)
+    .eq("user_id", user.id);
+
+  if (error) {
+    return redirect(`/profile/edit?error=${encodeURIComponent(error.message)}`);
+  }
+
+  revalidatePath("/profile/edit");
   redirect("/profile/edit?success=1");
 }
